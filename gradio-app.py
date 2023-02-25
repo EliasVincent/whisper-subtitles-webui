@@ -6,12 +6,29 @@ import torch
 import whisper
 from whisper.utils import get_writer
 
+import ytdlp_functions
+
+def download_video(url, quick, language, model, task, addSrtToVideo):
+    if quick:
+        returned_yt_file = ytdlp_functions.download_quick_mp4(url=url, folder=str(tempfile.gettempdir()))
+        print(returned_yt_file)
+        
+        # then just go through transcribe func
+        return transcribe(
+            inputFile=returned_yt_file, 
+            language=language, 
+            model=model, 
+            task=task, 
+            addSrtToVideo=addSrtToVideo)
+
 def transcribe(inputFile, language, model, task, addSrtToVideo):
     print("gpu available: " + str(torch.cuda.is_available()))
     gpu = torch.cuda.is_available()
     model = whisper.load_model(model)
+    inputFileCleared = inputFile if isinstance(inputFile, str) else inputFile.name
+    
     whisperOutput = model.transcribe(
-        inputFile.name, 
+        inputFileCleared, 
         task=task, 
         language=language, 
         verbose=True,
@@ -19,13 +36,13 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
     )
     
     writer = get_writer("srt", str(tempfile.gettempdir()))
-    writer(whisperOutput, inputFile.name)
-    srtFile = f"{inputFile.name}" + ".srt"
+    writer(whisperOutput, inputFileCleared)
+    srtFile = f"{inputFileCleared}" + ".srt"
     
     if addSrtToVideo:
-        video_out = inputFile.name + "_output.mkv"
+        video_out = inputFileCleared + "_output.mkv"
 
-        input_ffmpeg = ffmpeg.input(inputFile.name)
+        input_ffmpeg = ffmpeg.input(inputFileCleared)
         input_ffmpeg_sub = ffmpeg.input(srtFile)
 
         input_video = input_ffmpeg['v']
@@ -42,16 +59,41 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
     
     return srtFile
 
-demo = gr.Interface(
-    fn=transcribe,
-    inputs=[
-        "file",
-        gr.Textbox(value="source language (en, de, ja, ..)"),
-        gr.Dropdown(["tiny", "small", "medium", "large"], value="tiny"), 
-        gr.Radio(["transcribe", "translate"], value="translate"),
-        gr.Checkbox(label="embed subtitles into video file")
-    ],
-    outputs="file"
-)
+with gr.Blocks() as app:
+    gr.Markdown("# whisper-subtitle-webui")
+    with gr.Tab("Subtitle Video"):
+        st_file = gr.File()
+        st_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
+        st_model = gr.Dropdown(["tiny", "small", "medium", "large",], label="Model", value="tiny")
+        st_task = gr.Radio(["transcribe", "translate"], label="Task", value="translate")
+        st_embed = gr.Checkbox(label="embed subtitles into video file")
+        st_file_out = gr.File()
+        st_start_button = gr.Button("Run", variant="primary")
+    with gr.Tab("YouTube to Subtitle"):
+        gr.Markdown(">try to update yt-dlp if downloads don't work")
+        yt_url = gr.Textbox(placeholder="YouTube URL")
+        yt_quick = gr.Checkbox(label="quick settings", value=True, interactive=False)
+        yt_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
+        yt_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
+        yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="translate")
+        yt_embed = gr.Checkbox(label="embed subtitles into video file")
+        yt_file_out = gr.File()
+        yt_start_button = gr.Button("Download and Run", variant="primary")
 
-demo.launch()
+    st_start_button.click(fn=transcribe, inputs=
+                          [st_file, 
+                           st_lang, 
+                           st_model, 
+                           st_task, 
+                           st_embed
+                           ], outputs=st_file_out)
+    yt_start_button.click(fn=download_video, inputs=
+                          [
+                            yt_url,
+                            yt_quick,
+                            yt_lang,
+                            yt_model,
+                            yt_task,
+                            yt_embed,
+                          ], outputs=yt_file_out)
+app.launch()
