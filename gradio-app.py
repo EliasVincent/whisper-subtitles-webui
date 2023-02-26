@@ -11,9 +11,7 @@ import ytdlp_functions
 def download_video(url, quick, language, model, task, addSrtToVideo):
     if quick:
         returned_yt_file = ytdlp_functions.download_quick_mp4(url=url, folder=str(tempfile.gettempdir()))
-        print(returned_yt_file)
         
-        # then just go through transcribe func
         return transcribe(
             inputFile=returned_yt_file, 
             language=language, 
@@ -25,6 +23,7 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
     print("gpu available: " + str(torch.cuda.is_available()))
     gpu = torch.cuda.is_available()
     model = whisper.load_model(model)
+    # ytdlp_functions will give us a string, gradio filepicker an actual file
     inputFileCleared = inputFile if isinstance(inputFile, str) else inputFile.name
     
     whisperOutput = model.transcribe(
@@ -53,7 +52,6 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
             vcodec='copy', acodec='copy', scodec='srt'
         )
         stream = ffmpeg.overwrite_output(stream)
-        #execute(stream, desc=f"Adding `SubRip Subtitle file` to {inputFile.name}")
         ffmpeg.run(stream)
         return video_out
     
