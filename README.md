@@ -15,6 +15,8 @@ python -m venv .
 # if this doesn't work, pip install the following manually: openai-whisper ffmpeg torch gradio
 
 pip install -r requirements.txt
+
+python gradio-app.py
 ```
 
 # Features
