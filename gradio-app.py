@@ -84,7 +84,7 @@ with gr.Blocks() as app:
                            st_model, 
                            st_task, 
                            st_embed
-                           ], outputs=st_file_out)
+                           ], outputs=st_file_out, api_name="video_to_subs")
     yt_start_button.click(fn=download_video, inputs=
                           [
                             yt_url,
@@ -93,5 +93,5 @@ with gr.Blocks() as app:
                             yt_model,
                             yt_task,
                             yt_embed,
-                          ], outputs=yt_file_out)
+                          ], outputs=yt_file_out, api_name="yt_to_subs")
 app.launch()
