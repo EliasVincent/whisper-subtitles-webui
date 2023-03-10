@@ -1,6 +1,6 @@
 import gradio as gr
 import ffmpeg
-import os
+import argparse
 import tempfile
 import torch
 import whisper
@@ -58,7 +58,7 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
     return srtFile
 
 with gr.Blocks() as app:
-    gr.Markdown("# whisper-subtitle-webui")
+    gr.Markdown("# whisper-subtitles-webui")
     with gr.Tab("Subtitle Video"):
         st_file = gr.File()
         st_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
@@ -94,4 +94,7 @@ with gr.Blocks() as app:
                             yt_task,
                             yt_embed,
                           ], outputs=yt_file_out, api_name="yt_to_subs")
-app.launch()
+parser = argparse.ArgumentParser(description='Share option')
+parser.add_argument('--remote', type=bool, help='share', default=False)
+args = parser.parse_args()
+app.launch(share=args.remote)

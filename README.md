@@ -18,8 +18,10 @@ python -m venv .
 
 pip install -r requirements.txt
 
-python gradio-app.py
+python server.py
 ```
+
+To share, add `--remote=True`.
 
 # Features
 
