@@ -1,3 +1,5 @@
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/EliasVincent/whisper-subtitles-webui/blob/master/colab/whisper_subtitles_webui_colab.ipynb)
+
 # What
 
 A gradio frontend for generating transcribed or translated subtitles for videos using OpenAI Whisper locally.
