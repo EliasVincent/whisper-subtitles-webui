@@ -32,3 +32,7 @@ To share, add `--remote=True`.
 - Select different models for your hardware
 - CUDA support
 - Output .srt or video file with embedded subtitles
+
+# Troubleshooting
+
+If the output says `gpu available: False` [you might need to pip install a different version of Torch for your specific hardware](https://pytorch.org/get-started/locally/#start-locally)

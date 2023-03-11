@@ -8,16 +8,18 @@ from whisper.utils import get_writer
 
 import ytdlp_functions
 
+
 def download_video(url, quick, language, model, task, addSrtToVideo):
     if quick:
         returned_yt_file = ytdlp_functions.download_quick_mp4(url=url, folder=str(tempfile.gettempdir()))
-        
+
         return transcribe(
-            inputFile=returned_yt_file, 
-            language=language, 
-            model=model, 
-            task=task, 
+            inputFile=returned_yt_file,
+            language=language,
+            model=model,
+            task=task,
             addSrtToVideo=addSrtToVideo)
+
 
 def transcribe(inputFile, language, model, task, addSrtToVideo):
     print("gpu available: " + str(torch.cuda.is_available()))
@@ -25,19 +27,21 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
     model = whisper.load_model(model)
     # ytdlp_functions will give us a string, gradio filepicker an actual file
     inputFileCleared = inputFile if isinstance(inputFile, str) else inputFile.name
-    
+
     whisperOutput = model.transcribe(
-        inputFileCleared, 
-        task=task, 
-        language=language, 
+        inputFileCleared,
+        task=task,
+        language=language,
         verbose=True,
         fp16=gpu
     )
-    
+
     writer = get_writer("srt", str(tempfile.gettempdir()))
     writer(whisperOutput, inputFileCleared)
-    srtFile = f"{inputFileCleared}" + ".srt"
-    
+    # broken srt filepaths. Use those if tempdir acts weird.
+    # srtFile = f"{inputFileCleared}" + ".srt"
+    # anotherSrtFile = inputFileCleared.rsplit(".", 2)[0] + ".srt"
+    srtFile = inputFileCleared.rsplit(".", 1)[0] + ".srt"
     if addSrtToVideo:
         video_out = inputFileCleared + "_output.mkv"
 
@@ -54,23 +58,24 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
         stream = ffmpeg.overwrite_output(stream)
         ffmpeg.run(stream)
         return video_out
-    
+
     return srtFile
+
 
 with gr.Blocks() as app:
     gr.Markdown("# whisper-subtitles-webui")
     with gr.Tab("Subtitle Video"):
         st_file = gr.File()
         st_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
-        st_model = gr.Dropdown(["tiny", "small", "medium", "large",], label="Model", value="tiny")
+        st_model = gr.Dropdown(["tiny", "small", "medium", "large", ], label="Model", value="tiny")
         st_task = gr.Radio(["transcribe", "translate"], label="Task", value="translate")
         st_embed = gr.Checkbox(label="embed subtitles into video file")
         st_file_out = gr.File()
         st_start_button = gr.Button("Run", variant="primary")
     with gr.Tab("YouTube to Subtitle"):
         gr.Markdown(">try to update yt-dlp if downloads don't work")
-        yt_url = gr.Textbox(placeholder="YouTube URL")
-        yt_quick = gr.Checkbox(label="quick settings", value=True, interactive=False)
+        yt_url = gr.Textbox(label="YouTube URL", placeholder="YouTube URL")
+        yt_quick = gr.Checkbox(label="Quick settings", value=True, interactive=False)
         yt_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
         yt_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
         yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="translate")
@@ -79,21 +84,21 @@ with gr.Blocks() as app:
         yt_start_button = gr.Button("Download and Run", variant="primary")
 
     st_start_button.click(fn=transcribe, inputs=
-                          [st_file, 
-                           st_lang, 
-                           st_model, 
-                           st_task, 
-                           st_embed
-                           ], outputs=st_file_out, api_name="video_to_subs")
+    [st_file,
+     st_lang,
+     st_model,
+     st_task,
+     st_embed
+     ], outputs=st_file_out, api_name="video_to_subs")
     yt_start_button.click(fn=download_video, inputs=
-                          [
-                            yt_url,
-                            yt_quick,
-                            yt_lang,
-                            yt_model,
-                            yt_task,
-                            yt_embed,
-                          ], outputs=yt_file_out, api_name="yt_to_subs")
+    [
+        yt_url,
+        yt_quick,
+        yt_lang,
+        yt_model,
+        yt_task,
+        yt_embed,
+    ], outputs=yt_file_out, api_name="yt_to_subs")
 parser = argparse.ArgumentParser(description='Share option')
 parser.add_argument('--remote', type=bool, help='share', default=False)
 args = parser.parse_args()
