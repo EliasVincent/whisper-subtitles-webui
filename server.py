@@ -77,7 +77,7 @@ with gr.Blocks() as app:
         yt_url = gr.Textbox(label="YouTube URL", placeholder="YouTube URL")
         yt_quick = gr.Checkbox(label="Quick settings", value=True, interactive=False)
         yt_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
-        yt_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
+        yt_model = gr.Dropdown(["tiny", "small", "medium", "large", "large_v2", "large_v3"], label="Model", value="tiny")
         yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="translate")
         yt_embed = gr.Checkbox(label="embed subtitles into video file")
         yt_file_out = gr.File()
