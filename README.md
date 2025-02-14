@@ -1,29 +1,44 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/EliasVincent/whisper-subtitles-webui/blob/master/colab/whisper_subtitles_webui_colab.ipynb)
 
-# What
-
 A gradio frontend for generating transcribed or translated subtitles for videos using OpenAI Whisper locally.
-
-# Why
-
-I just wanted a nice frontend where you can just drop a video or url and it will spit out subs. Whisper is amazing but I haven't found that many implementations, especially ones that can be run locally.
-
-![](img/1.png)
 
 # Install
 
-```
-python -m venv .
-.\Scripts\activate
+This has been tested with Python 3.12
 
+```
+python -m venv .venv
+```
+
+Activate the venv on Windows with
+
+```
+.\.venv\Scripts\activate
+```
+
+On Linux and Mac, run
+
+```
+source .venv/bin/activate
+```
+
+Now, install the pip dependencies:
+
+```
 # if this doesn't work, pip install the following manually: openai-whisper ffmpeg torch gradio
 
 pip install -r requirements.txt
+```
 
+Then launch the server with
+
+```
 python server.py
 ```
 
 To share, add `--remote=True`.
+
+For embedding subtitles into a video, you need to have `ffmpeg` installed on your system.
 
 # Features
 
@@ -38,3 +53,9 @@ To share, add `--remote=True`.
 # Troubleshooting
 
 If the output says `gpu available: False` [you might need to pip install a different version of Torch for your specific hardware](https://pytorch.org/get-started/locally/#start-locally)
+
+# Why
+
+I just wanted a nice frontend where you can just drop a video or url and it will spit out subs. Whisper is amazing but I haven't found that many implementations, especially ones that can be run locally.
+
+![](img/1.png)

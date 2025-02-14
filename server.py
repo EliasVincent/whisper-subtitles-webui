@@ -1,9 +1,10 @@
 import gradio as gr
-import ffmpeg
 import argparse
 import tempfile
 import torch
 import whisper
+import os
+import subprocess
 from whisper.utils import get_writer
 
 import ytdlp_functions
@@ -36,27 +37,33 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
         fp16=gpu
     )
 
-    writer = get_writer("srt", str(tempfile.gettempdir()))
+    temp_dir = str(tempfile.gettempdir())
+    writer = get_writer("srt", temp_dir)
     writer(whisperOutput, inputFileCleared)
-    # broken srt filepaths. Use those if tempdir acts weird.
+
+    # Construct the correct srtFile path
+    srtFile = os.path.join(temp_dir, os.path.basename(inputFileCleared).rsplit(".", 1)[0] + ".srt")
+
+    # broken srt filepaths. Use those if tempdir above acts weird.
     # srtFile = f"{inputFileCleared}" + ".srt"
     # anotherSrtFile = inputFileCleared.rsplit(".", 2)[0] + ".srt"
-    srtFile = inputFileCleared.rsplit(".", 1)[0] + ".srt"
+    # srtFile = inputFileCleared.rsplit(".", 1)[0] + ".srt"
     if addSrtToVideo:
         video_out = inputFileCleared + "_output.mkv"
 
-        input_ffmpeg = ffmpeg.input(inputFileCleared)
-        input_ffmpeg_sub = ffmpeg.input(srtFile)
+        try:
+            command = [
+                'ffmpeg',
+                '-i', inputFileCleared,
+                '-vf', f'subtitles={srtFile}',
+                '-c:a', 'copy',
+                video_out
+            ]
+            subprocess.run(command, check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError as e:
+            print(e.stderr)
+            raise
 
-        input_video = input_ffmpeg['v']
-        input_audio = input_ffmpeg['a']
-        input_subtitles = input_ffmpeg_sub['s']
-        stream = ffmpeg.output(
-            input_video, input_audio, input_subtitles, video_out,
-            vcodec='copy', acodec='copy', scodec='srt'
-        )
-        stream = ffmpeg.overwrite_output(stream)
-        ffmpeg.run(stream)
         return video_out
 
     return srtFile
@@ -68,18 +75,18 @@ with gr.Blocks() as app:
         st_file = gr.File()
         st_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
         st_model = gr.Dropdown(["tiny", "small", "medium", "large", ], label="Model", value="tiny")
-        st_task = gr.Radio(["transcribe", "translate"], label="Task", value="translate")
-        st_embed = gr.Checkbox(label="embed subtitles into video file")
+        st_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
+        st_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
         st_file_out = gr.File()
         st_start_button = gr.Button("Run", variant="primary")
-    with gr.Tab("YouTube to Subtitle"):
+    with gr.Tab("YouTube to Subtitle (experimental)"):
         gr.Markdown(">try to update yt-dlp if downloads don't work")
         yt_url = gr.Textbox(label="YouTube URL", placeholder="YouTube URL")
         yt_quick = gr.Checkbox(label="Quick settings", value=True, interactive=False)
         yt_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
         yt_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
-        yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="translate")
-        yt_embed = gr.Checkbox(label="embed subtitles into video file")
+        yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
+        yt_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
         yt_file_out = gr.File()
         yt_start_button = gr.Button("Download and Run", variant="primary")
 
