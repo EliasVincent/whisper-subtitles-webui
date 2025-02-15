@@ -12,6 +12,8 @@ import ytdlp_functions
 
 FULL_TO_CODE = {v: k for k, v in LANGUAGES.items()}
 
+MODELS = ["tiny", "base", "small", "medium", "large", "large-v3-turbo", "turbo", "tiny.en", "base.en", "small.en", "medium.en"]
+
 # Disable Gradio data collection
 os.environ["GRADIO_ANALYTICS_ENABLED"] = "False"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
@@ -88,7 +90,7 @@ with gr.Blocks() as app:
             choices=list(LANGUAGES.values()),
             value=LANGUAGES["en"]
         )
-        st_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
+        st_model = gr.Dropdown(MODELS, label="Model", value="tiny")
         st_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
         st_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
         st_file_out = gr.File()
@@ -101,7 +103,7 @@ with gr.Blocks() as app:
             choices=list(LANGUAGES.values()),
             value=LANGUAGES["en"]
         )
-        batch_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
+        batch_model = gr.Dropdown(MODELS, label="Model", value="tiny")
         batch_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
         batch_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
         batch_output = gr.File()
@@ -115,7 +117,7 @@ with gr.Blocks() as app:
             choices=list(LANGUAGES.values()),
             value=LANGUAGES["en"]
         )
-        yt_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
+        yt_model = gr.Dropdown(MODELS, label="Model", value="tiny")
         yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
         yt_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
         yt_file_out = gr.File()
