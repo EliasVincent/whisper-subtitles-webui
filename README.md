@@ -59,3 +59,7 @@ If the output says `gpu available: False` [you might need to pip install a diffe
 I just wanted a nice frontend where you can just drop a video or url and it will spit out subs. Whisper is amazing but I haven't found that many implementations, especially ones that can be run locally.
 
 ![](img/1.png)
+
+# Privacy
+
+By default, Gradio sends some data to its servers. Gradio provides some variables to disable them, which have been applied here.

@@ -12,6 +12,11 @@ import ytdlp_functions
 
 FULL_TO_CODE = {v: k for k, v in LANGUAGES.items()}
 
+# Disable Gradio data collection
+os.environ["GRADIO_ANALYTICS_ENABLED"] = "False"
+os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+os.environ["DISABLE_TELEMETRY"] = "1"
+os.environ["DO_NOT_TRACK"] = "1"
 
 def download_video(url, quick, language, model, task, addSrtToVideo):
     if quick:
