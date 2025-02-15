@@ -7,7 +7,10 @@ import os
 import subprocess
 from whisper.utils import get_writer
 
+from languages import LANGUAGES
 import ytdlp_functions
+
+FULL_TO_CODE = {v: k for k, v in LANGUAGES.items()}
 
 
 def download_video(url, quick, language, model, task, addSrtToVideo):
@@ -26,13 +29,15 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
     print("gpu available: " + str(torch.cuda.is_available()))
     gpu = torch.cuda.is_available()
     model = whisper.load_model(model)
+    if inputFile is None:
+        raise gr.Error("No input file provided")
     # ytdlp_functions will give us a string, gradio filepicker an actual file
     inputFileCleared = inputFile if isinstance(inputFile, str) else inputFile.name
 
     whisperOutput = model.transcribe(
         inputFileCleared,
         task=task,
-        language=language,
+        language=FULL_TO_CODE[language],
         verbose=True,
         fp16=gpu
     )
@@ -62,18 +67,23 @@ def transcribe(inputFile, language, model, task, addSrtToVideo):
             subprocess.run(command, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             print(e.stderr)
-            raise
+            raise gr.Error("ffmpeg failed to embed subtitles into video")
 
         return video_out
 
     return srtFile
 
 
+
 with gr.Blocks() as app:
     gr.Markdown("# whisper-subtitles-webui")
     with gr.Tab("Subtitle Video"):
         st_file = gr.File()
-        st_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
+        st_lang = gr.Dropdown(
+            label="Language",
+            choices=list(LANGUAGES.values()),
+            value=LANGUAGES["en"]
+        )
         st_model = gr.Dropdown(["tiny", "small", "medium", "large", ], label="Model", value="tiny")
         st_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
         st_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
@@ -83,7 +93,11 @@ with gr.Blocks() as app:
         gr.Markdown(">try to update yt-dlp if downloads don't work")
         yt_url = gr.Textbox(label="YouTube URL", placeholder="YouTube URL")
         yt_quick = gr.Checkbox(label="Quick settings", value=True, interactive=False)
-        yt_lang = gr.Textbox(label="Language", placeholder="source language (en, de, ja, ..)")
+        yt_lang = gr.Dropdown(
+            label="Language",
+            choices=list(LANGUAGES.values()),
+            value=LANGUAGES["en"]
+        )
         yt_model = gr.Dropdown(["tiny", "small", "medium", "large"], label="Model", value="tiny")
         yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
         yt_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
