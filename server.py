@@ -82,8 +82,8 @@ def batch_transcribe(files, language, model, task, addSrtToVideo):
 
 
 with gr.Blocks() as app:
-    gr.Markdown("# whisper-subtitles-webui")
-    with gr.Tab("Subtitle Video"):
+    gr.Markdown("# Whisper Subtitles WebUI")
+    with gr.Tab("Subtitles for Audio/Video File"):
         st_file = gr.File()
         st_lang = gr.Dropdown(
             label="Language",
@@ -92,10 +92,10 @@ with gr.Blocks() as app:
         )
         st_model = gr.Dropdown(MODELS, label="Model", value="tiny")
         st_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
-        st_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
+        st_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required, video only)")
         st_file_out = gr.File()
         st_start_button = gr.Button("Run", variant="primary")
-    with gr.Tab("Batch Process Videos"):
+    with gr.Tab("Batch Process (experimental)"):
         gr.Markdown("Drop multiple video files to transcribe each file")
         batch_files = gr.File(label="Video Files", file_count="multiple")
         batch_lang = gr.Dropdown(
@@ -105,10 +105,10 @@ with gr.Blocks() as app:
         )
         batch_model = gr.Dropdown(MODELS, label="Model", value="tiny")
         batch_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
-        batch_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
+        batch_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required, video only)")
         batch_output = gr.File()
         batch_button = gr.Button("Process Batch", variant="primary")
-    with gr.Tab("YouTube to Subtitle (experimental)"):
+    with gr.Tab("YouTube to Subtitles (experimental)"):
         gr.Markdown(">try to update yt-dlp if downloads don't work")
         yt_url = gr.Textbox(label="YouTube URL", placeholder="YouTube URL")
         yt_quick = gr.Checkbox(label="Quick settings", value=True, interactive=False)
@@ -119,7 +119,7 @@ with gr.Blocks() as app:
         )
         yt_model = gr.Dropdown(MODELS, label="Model", value="tiny")
         yt_task = gr.Radio(["transcribe", "translate"], label="Task", value="transcribe")
-        yt_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required)")
+        yt_embed = gr.Checkbox(label="embed subtitles into video file (ffmpeg required, video only)")
         yt_file_out = gr.File()
         yt_start_button = gr.Button("Download and Run", variant="primary")
 

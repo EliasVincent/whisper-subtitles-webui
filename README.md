@@ -2,6 +2,8 @@
 
 A gradio frontend for generating transcribed or translated subtitles for videos using OpenAI Whisper locally.
 
+![](img/1.png)
+
 # Install
 
 This has been tested with Python 3.12
@@ -57,8 +59,6 @@ If the output says `gpu available: False` [you might need to pip install a diffe
 # Why
 
 I just wanted a nice frontend where you can just drop a video or url and it will spit out subs. Whisper is amazing but I haven't found that many implementations, especially ones that can be run locally.
-
-![](img/1.png)
 
 # Privacy
 
